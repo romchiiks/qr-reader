@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Database Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.6em;
+      text-align: left;
+    }
+
+    th {
+      cursor: pointer;
+      background: #eee;
+      user-select: none;
+    }
+
+    .controls {
+      margin-bottom: 1em;
+    }
+
+    .controls label {
+      margin-right: 1em;
+    }
+
+    input[type="date"] {
+      padding: 0.3em;
+    }
+
+    button, select {
+      padding: 0.3em 0.7em;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR кодики</h1>
+  
+  <div class="controls">
+    <label for="datetime">Записи от:</label>
+    <input type="date" id="datetime">
+    <br><br>
+    <label for="city">В городе:</label>
+    <select id="city">
+      <option value="">Все города</option>
+      <option value="Москва">Москва</option>
+      <option value="Кимры">Кимры</option>
+    </select>
+    <br><br>
+    <button onclick="fetchData()">Применить</button>
+  </div>
+
+  <table id="qrTable">
+    <thead>
+      <tr>
+        <th data-sort="id" data-label="ID" onclick="sortBy('id')">ID</th>
+        <th data-sort="city" data-label="Город" onclick="sortBy('city')">Город</th>
+        <th data-sort="text" data-label="Текст" onclick="sortBy('text')">Текст</th>
+        <th data-sort="quantity" data-label="Количество" onclick="sortBy('quantity')">Количество</th>
+        <th data-sort="timestamp" data-label="Дата" onclick="sortBy('timestamp')">Дата</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let currentData = [];
+    let sortDirection = { id: 1, city: 1, quantity: 1, timestamp: 1, text: 1 };
+
+    async function fetchData() {
+      const date = document.getElementById("datetime").value;
+      const city = document.getElementById("city").value;
+      let url = "http://localhost:5000/data";
+
+      if (date) {
+        const [year, month, day] = date.split("-");
+        const formatted = `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`;
+        url += `?after=${encodeURIComponent(formatted)}`;
+      }
+      if (city) {
+      url += (url.includes("?") ? "&" : "?") + `city=${encodeURIComponent(city)}`;
+      }
+      const res = await fetch(url);
+      currentData = await res.json();
+      renderTable(currentData);
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector("#qrTable tbody");
+      tbody.innerHTML = data.map(row => `
+        <tr>
+          <td>${row.id}</td>
+          <td>${row.city}</td>
+          <td>${row.text}</td>
+          <td>${row.quantity}</td>
+          <td>${row.timestamp}</td>
+        </tr>
+      `).join("");
+    }
+
+    function sortBy(key) {
+      sortDirection[key] *= -1;
+      currentData.sort((a, b) => {
+        if (key === "timestamp") {
+          return sortDirection[key] * (new Date(a[key].split('.').reverse().join('-')) - new Date(b[key].split('.').reverse().join('-')));
+        }
+        if (key === "text" || key == "city") {
+          return sortDirection[key] * a[key].localeCompare(b[key]);
+        }
+        return sortDirection[key] * (a[key] - b[key]);
+      });
+      renderTable(currentData);
+      updateSortIcons(key);
+    }
+
+    function updateSortIcons(activeKey) {
+      const headers = document.querySelectorAll("th");
+      headers.forEach(th => {
+        const key = th.getAttribute("data-sort");
+        if (!key) return;
+        let arrow = "";
+        if (key === activeKey) {
+          arrow = sortDirection[key] === 1 ? " ▲" : " ▼";
+        }
+        th.innerHTML = th.dataset.label + arrow;
+      });
+    }
+
+    window.onload = fetchData;
+  </script>
+</body>
+</html>
