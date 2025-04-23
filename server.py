@@ -29,7 +29,7 @@ def get_data():
     params = []
 
     if time_filter:
-        query += " WHERE timestamp >= ?"
+        query += " WHERE timestamp <= ?"
         params.append(time_filter)
         
     if city_filter:
