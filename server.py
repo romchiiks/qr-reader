@@ -28,7 +28,7 @@ def get_data():
 
     if time_filter != None:
         query += " WHERE timestamp >= ?"
-        params.append(time_filter)
+        params.append(time_filter.strftime('%d.%m.%Y'))
         
     if city_filter:
         query += " AND city = ?"
