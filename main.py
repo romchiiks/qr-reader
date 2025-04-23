@@ -3,6 +3,7 @@ import sqlite3
 from datetime import datetime
 from qreader import QReader
 from collections import Counter
+import json
 
 # Сканер QR кодов
 qreader = QReader(reencode_to='shift-jis')
@@ -11,11 +12,22 @@ qreader = QReader(reencode_to='shift-jis')
 conn = sqlite3.connect("qrdata.db")
 cursor = conn.cursor()
 
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS qr_codes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            city TEXT,
+            text TEXT,
+            quantity INTEGER,
+            timestamp TEXT
+        )
+    """)
+
 # Время для названия файлов и timestamp
 time = datetime.now().strftime("%d-%m-%Y")
 
 # конфигурация OpenCV 
-cams = {"Москва": "rtsp://admin:A4001789a@10.77.17.5:554/"}
+with open("cams.json", "r") as f:
+    cams = json.load(f)
 
 # Основная логика
 for city, url in cams.items():
@@ -32,20 +44,11 @@ for city, url in cams.items():
 
     decoded_text = qreader.detect_and_decode(image=image)
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS qr_codes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            city TEXT,
-            text TEXT,
-            quantity INTEGER,
-            timestamp TEXT
-        )
-    """)
-
     counts = Counter(decoded_text)
 
     for text, qty in counts.items():
         if text != None:
+            print(text)
             cursor.execute("INSERT INTO qr_codes (city, text, quantity, timestamp) VALUES (?, ?, ?, ?)", (city, text, qty, time))
 
     conn.commit()
