@@ -15,6 +15,9 @@ def serve_index():
 def get_data():
     if request.args.get("after") != None:
         time_filter = datetime.strptime(request.args.get("after"), '%d.%m.%Y').date()
+    else:
+        time_filter = None
+
     city_filter = request.args.get("city")
 
     conn = sqlite3.connect("qrdata.db")
@@ -23,7 +26,7 @@ def get_data():
     query = "SELECT id, city, text, quantity, timestamp FROM qr_codes"
     params = []
 
-    if time_filter:
+    if time_filter != None:
         query += " WHERE timestamp >= ?"
         params.append(time_filter)
         
