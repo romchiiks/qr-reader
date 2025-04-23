@@ -13,7 +13,8 @@ def serve_index():
 
 @app.route("/data")
 def get_data():
-    time_filter = datetime.strptime(request.args.get("after"), '%d.%m.%Y').date()
+    if request.args.get("after") != None:
+        time_filter = datetime.strptime(request.args.get("after"), '%d.%m.%Y').date()
     city_filter = request.args.get("city")
 
     conn = sqlite3.connect("qrdata.db")
