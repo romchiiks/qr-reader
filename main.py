@@ -5,7 +5,7 @@ from qreader import QReader
 from collections import Counter
 
 # Сканер QR кодов
-qreader = QReader()
+qreader = QReader(reencode_to='shift-jis')
 
 # Подключение к БД
 conn = sqlite3.connect("qrdata.db")
