@@ -9,7 +9,7 @@ def select_db():
     result = cursor.fetchall()
     conn.close()
     for row in result:
-        result_list.append(f"ID: {row[0]} VALUE: {row[1]} QUANTITY: {row[2]} TIME: {row[3]}")
+        result_list.append(f"ID: {row[0]} CITY: {row[1]} TEXT: {row[2]} QUANTITY: {row[3]} TIME: {row[4]}")
 
     return result_list 
 
