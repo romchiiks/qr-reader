@@ -15,7 +15,7 @@ cursor = conn.cursor()
 time = datetime.now().strftime("%d-%m-%Y")
 
 # конфигурация OpenCV 
-cams = {"Город": "", "Кимры": ""}
+cams = {"Москва": "rtsp://admin:A4001789a@10.77.17.5:554/"}
 
 # Основная логика
 for city, url in cams.items():
