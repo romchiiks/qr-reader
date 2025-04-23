@@ -13,8 +13,10 @@ def serve_index():
 
 @app.route("/data")
 def get_data():
-    if request.args.get("after") != None:
-        time_filter = datetime.strftime(request.args.get("after"), '%d.%m.%Y')
+    after_param = request.args.get("after")
+    if after_param:
+        # Convert 'dd.mm.yyyy' → datetime → 'dd-mm-yyyy'
+        time_filter = datetime.strptime(after_param, '%d.%m.%Y').strftime('%d-%m-%Y')
     else:
         time_filter = None
 
@@ -26,9 +28,9 @@ def get_data():
     query = "SELECT id, city, text, quantity, timestamp FROM qr_codes"
     params = []
 
-    if time_filter != None:
-        query += " WHERE timestamp >= ?"
-        params.append(datetime.date(time_filter).strftime('%d-%m-%Y'))
+    if time_filter:
+        query += " WHERE timestamp <= ?"
+        params.append(time_filter)
         
     if city_filter:
         query += " AND city = ?"
