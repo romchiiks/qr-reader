@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
-from datetime import time
+from datetime import datetime
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
@@ -14,7 +14,7 @@ def serve_index():
 @app.route("/data")
 def get_data():
     if request.args.get("after") != None:
-        time_filter = time.strftime(request.args.get("after"), '%d.%m.%Y')
+        time_filter = datetime.strftime(request.args.get("after"), '%d.%m.%Y')
     else:
         time_filter = None
 
@@ -28,7 +28,7 @@ def get_data():
 
     if time_filter != None:
         query += " WHERE timestamp >= ?"
-        params.append(time.strftime(time_filter, '%d-%m-%Y'))
+        params.append(datetime.date(time_filter).strftime('%d-%m-%Y'))
         
     if city_filter:
         query += " AND city = ?"
