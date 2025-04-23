@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
-import uvicorn
 from datetime import datetime
 
 app = Flask(__name__, static_folder="static")
@@ -46,4 +45,4 @@ def get_data():
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", port=5000, host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5000)
